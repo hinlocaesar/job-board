@@ -1,0 +1,63 @@
+# ROLE
+You are a senior full-stack engineer. Build a headless website with **Umbraco (Content Delivery API)** as the CMS and **Vue 3** as the frontend. Work autonomously, but ask me before any destructive action.
+
+# TOOLING PRIORITY (follow strictly)
+1. **Official MCP servers and tools first.** At the start, list every MCP server and tool available to you and use the official ones before writing manual code, curl calls, or guesses:
+   - **Umbraco Developer MCP (official)**: `@umbraco-cms/mcp-dev`, repo `github.com/umbraco/Umbraco-CMS-MCP-Dev`. Use it to inspect and create document types, data types, templates, media and content in the Umbraco backoffice through the Management API. It must match the Umbraco major version of my instance (16 or 17). Dev/local instance only. NEVER connect it to production.
+   - Any official Vue / Vite / Vue DevTools / Nuxt MCP or documentation tools, if available.
+   - Playwright MCP (if available) to verify the rendered pages.
+   - GitHub MCP (if available) for repo operations.
+2. If an official MCP is NOT configured, do not silently skip it. Tell me exactly what to add to my OpenCode config (the `mcp` block in `opencode.json`), with the env vars needed (`UMBRACO_CLIENT_ID`, `UMBRACO_CLIENT_SECRET`, `UMBRACO_BASE_URL`), then continue with the fallback.
+3. Fallback order: official docs (docs.umbraco.com, vuejs.org) via web fetch → the instance's OpenAPI/Swagger spec → manual implementation.
+4. Before using any Umbraco or Vue API you are unsure of, verify it against the official docs for the version in use. Do not rely on memory. Prefer stable, documented APIs.
+
+# STACK
+- Backend: Umbraco `<16 | 17>` on .NET, running locally at `https://localhost:<port>`
+- Delivery: **Umbraco Content Delivery API** (v2 endpoints under `/umbraco/delivery/api/v2/`)
+- Frontend: **Vue 3 + TypeScript + Vite**, Composition API with `<script setup>`
+- Router: Vue Router · State/data: Pinia + TanStack Query (or plain composables, keep it simple)
+- Styling: `<Tailwind | plain CSS>`
+- Package manager: `<pnpm | npm>`
+
+# GOAL
+We are building a remote-work job marketplace in the style of OnlineJobs.ph, connecting
+Philippine-based remote workers with employers worldwide. Follow AGENTS.md.
+
+# ARCHITECTURE (do not deviate without asking)
+- **Umbraco (headless, Content Delivery API)**: marketing/editorial content only: homepage,
+  blog, SEO landing pages, FAQ/help center, category descriptions.
+- **Marketplace API**: separate ASP.NET Core project in the same solution, PostgreSQL via EF Core,
+  ASP.NET Identity + JWT. Owns users, profiles, jobs, applications, subscriptions.
+- **Frontend**: `<Nuxt 3 | Vue 3 + Vite>` + TypeScript, consuming both APIs. Public job and
+  profile pages must be SEO-friendly (SSR/prerender).
+- Use official MCP/tools first (Umbraco Developer MCP for the CMS side, dev instance only).
+
+# PHASE 1: MVP ONLY (build this, nothing more)
+1. Auth: register/login as Employer or Worker, email verification, password reset.
+2. Worker profile: headline, skills, experience, expected rate, availability, resume upload
+   (blob storage, size/type validated), public/private toggle.
+3. Employer: post a job (title, category, description, type, pay range), edit/close it.
+4. Public job board: list, search, filter by category/type/pay, pagination, job detail page.
+5. Apply flow: worker applies to a job, employer sees applicants and can shortlist/reject.
+6. Umbraco: homepage, blog list/post, one landing-page template, FAQ. Delivered via the Delivery API.
+7. Basic admin moderation: approve/flag jobs, ban users.
+
+# OUT OF SCOPE FOR NOW
+Payments/subscriptions, in-app messaging, notifications beyond email, mobile app.
+Design the data model so they can be added later, but don't build them.
+
+# NON-FUNCTIONAL
+- Rate limiting and input validation on all public endpoints. Server-side authorization checks.
+- Personal data handling compliant in spirit with the PH Data Privacy Act: consent on signup,
+  account deletion/export, contact details of workers hidden from unauthenticated users.
+- Full-text search in Postgres for now, behind an interface so it can be swapped later.
+
+# WORKFLOW
+1. Discover: list available MCP tools, read the relevant docs, then propose the data model
+   (ERD in text) and the solution/folder structure. **Stop and wait for my approval.**
+2. Marketplace API + migrations, then Umbraco content model and sample content.
+3. Frontend pages against real endpoints.
+4. Tests, type-check, lint, and browser verification. Report used tools vs. fallbacks.
+
+# START
+Begin with step 1 and stop at the approval gate.

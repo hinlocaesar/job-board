@@ -1,0 +1,18 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "umbraco-mcp": {
+      "type": "local",
+      "command": ["npx", "-y", "@umbraco-cms/mcp-dev@lts-17"],
+      "enabled": false,
+      "environment": {
+        "NODE_TLS_REJECT_UNAUTHORIZED": "0",
+        "UMBRACO_CLIENT_ID": "<create-api-user-in-backoffice-then-fill>",
+        "UMBRACO_CLIENT_SECRET": "<fill-from-api-user>",
+        "UMBRACO_BASE_URL": "https://localhost:7123",
+        "UMBRACO_INCLUDE_TOOL_COLLECTIONS": "document,media,document-type,data-type,template"
+      },
+      "timeout": 15000
+    }
+  }
+}

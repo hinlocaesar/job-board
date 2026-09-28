@@ -1,0 +1,50 @@
+# --- Secrets / local config ---
+.env
+.env.local
+*.local.json
+appsettings.Local.json
+
+# --- .NET ---
+bin/
+obj/
+artifacts/
+*.user
+*.suo
+.vs/
+TestResults/
+coverage*.json
+coverage*.xml
+*.trx
+publish/
+
+# Umbraco runtime data (SQLite dev DB + generated files)
+backend/**/umbraco.db
+backend/**/App_Data/
+backend/**/App_Plugins/
+backend/**/wwwroot/media/
+backend/**/wwwroot/data/
+backend/**/Logs/
+backend/**/*.Generated.*.cs
+backend/**/obj/
+backend/**/bin/
+
+# Marketplace API runtime data (uploads + log-mode email outbox)
+backend/**/storage/
+backend/**/logs/
+
+# --- Node / frontend ---
+node_modules/
+dist/
+.vite/
+.pnpm-store/
+*.tsbuildinfo
+coverage/
+playwright-report/
+test-results/
+
+# --- Editors / OS ---
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
