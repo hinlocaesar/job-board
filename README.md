@@ -69,12 +69,35 @@ There is no local SMTP: verification/reset e-mails are written to
 
 Umbraco backoffice: `https://localhost:7123/umbraco` (`admin@jobboard.local`).
 
+### Filling the board with real jobs
+
+The Marketplace API can pull live remote jobs from two free, key-less feeds
+(Remotive, Jobicy) and publish them as normal listings:
+
+```powershell
+# admin-only; ?limit= is capped at 200 per feed
+Invoke-RestMethod "http://localhost:5201/api/admin/import/remote-jobs?limit=100" -Method Post `
+  -Headers @{ Authorization = "Bearer <admin access token>" }
+```
+
+- **Idempotent** — each posting is stored with `jobs.source` + `jobs.source_id` behind
+  a unique index, so re-running only adds what is new.
+- Imported jobs publish immediately (they are curated public feeds) and always end
+  with an attribution line linking to the original posting.
+- Category, job type, seniority, skills and pay are inferred from the feed data
+  (`ExternalJobMapper`); pay stays "Negotiable" when the feed publishes none.
+- Each external company gets its own employer profile on a locked system account
+  (`company-<slug>@imports.jobboard.local`, never e-mail verified → cannot log in).
+
+To run it automatically on boot in Development, set `Imports__RemoteJobsOnStartup=true`
+(limit via `Imports__LimitPerSource`).
+
 ## Commands
 
 ```bash
 # backend
 dotnet build JobBoard.slnx
-dotnet test  JobBoard.slnx
+dotnet test  JobBoard.slnx     # stop a running API first — it locks bin/
 
 # frontend
 pnpm type-check
