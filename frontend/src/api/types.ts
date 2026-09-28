@@ -83,10 +83,4 @@ export interface StatusResponse {
   reason?: string | null
 }
 
-/** Endpoints that only acknowledge. */
-export interface AckResponse {
-  accepted?: boolean
-  message?: string
-}
-
 export type Role = 'admin' | 'employer' | 'worker'
