@@ -351,6 +351,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/import/remote-jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: {
+                    limit?: number | string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ImportSummaryDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/jobs/{jobId}/apply": {
         parameters: {
             query?: never;
@@ -1757,6 +1794,27 @@ export interface components {
         };
         /** Format: binary */
         IFormFile: string;
+        ImportSourceDto: {
+            source: string;
+            /** Format: int32 */
+            fetched: number | string;
+            /** Format: int32 */
+            created: number | string;
+            /** Format: int32 */
+            skipped: number | string;
+            /** Format: int32 */
+            failed: number | string;
+            error: null | string;
+        };
+        ImportSummaryDto: {
+            /** Format: int32 */
+            created: number | string;
+            /** Format: int32 */
+            skipped: number | string;
+            /** Format: int32 */
+            failed: number | string;
+            sources: components["schemas"]["ImportSourceDto"][];
+        };
         JobDetailDto: {
             /** Format: uuid */
             id: string;
@@ -1795,6 +1853,7 @@ export interface components {
             applicantCount: number | string;
             skills: string[];
             canEdit: boolean;
+            source: null | string;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */

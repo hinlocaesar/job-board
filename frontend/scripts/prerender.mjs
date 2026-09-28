@@ -38,12 +38,8 @@ const template = readFileSync(join(dist, 'index.html'), 'utf-8')
 
 const { render } = await import(pathToFileURL(join(root, 'dist-ssr', 'entry-server.js')).href)
 
-async function getJson(url, { insecure = false } = {}) {
-  const response = await fetch(url, {
-    headers: { accept: 'application/json' },
-    // Node's fetch has no per-request "insecure" flag; the env var above covers https.
-    ...(insecure ? {} : {}),
-  })
+async function getJson(url) {
+  const response = await fetch(url, { headers: { accept: 'application/json' } })
   if (!response.ok) throw new Error(`${response.status} for ${url}`)
   return response.json()
 }
@@ -59,9 +55,11 @@ const routes = new Set([
   '/hire-filipino-virtual-assistants',
 ])
 
-// Dynamic: every published job (the SEO-critical pages).
+// Dynamic: the most recent published jobs (the SEO-critical pages). The board is
+// live for everything else; prerendering is capped so builds stay bounded.
+const JOB_PAGE_LIMIT = 50
 try {
-  const jobs = await getJson(`${API_BASE}/jobs?pageSize=100&page=1`)
+  const jobs = await getJson(`${API_BASE}/jobs?pageSize=${JOB_PAGE_LIMIT}&sort=newest`)
   for (const job of jobs.items ?? []) routes.add(`/jobs/${job.slug}`)
   console.log(`+ ${jobs.items?.length ?? 0} job pages`)
 } catch (error) {

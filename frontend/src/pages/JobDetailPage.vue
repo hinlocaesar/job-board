@@ -75,6 +75,18 @@ async function apply(): Promise<void> {
 function applyErrorText(): string | undefined {
   return applyMessage.value?.text ?? undefined
 }
+
+/** Feed keys are stored in `jobs.source`; show something a reader recognises. */
+const SOURCE_LABELS: Record<string, string> = {
+  remotive: 'Remotive',
+  jobicy: 'Jobicy',
+  remoteok: 'RemoteOK',
+  arbeitnow: 'Arbeitnow',
+}
+
+function sourceLabel(source: string): string {
+  return SOURCE_LABELS[source.toLowerCase()] ?? source
+}
 </script>
 
 <template>
@@ -101,6 +113,9 @@ function applyErrorText(): string | undefined {
             </div>
             <p class="mt-1 text-slate-500">
               {{ job.companyName }} · {{ job.categoryName }}
+              <span v-if="job.source" class="ml-1 text-xs text-slate-400">
+                (imported from {{ sourceLabel(job.source) }})
+              </span>
             </p>
           </div>
           <div class="text-right">
@@ -115,6 +130,7 @@ function applyErrorText(): string | undefined {
           <span class="chip">{{ humanize(job.region) }}</span>
           <span v-if="job.hoursPerWeek" class="chip">{{ job.hoursPerWeek }} hrs/week</span>
           <span v-if="job.closesAt" class="chip">Closes {{ formatDate(job.closesAt) }}</span>
+          <span v-if="job.source" class="chip bg-sky-50 text-sky-700">Imported · {{ sourceLabel(job.source) }}</span>
         </div>
       </header>
 
