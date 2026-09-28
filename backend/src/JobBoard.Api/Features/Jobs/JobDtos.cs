@@ -1,0 +1,66 @@
+namespace JobBoard.Api.Features.Jobs;
+
+public sealed record JobInput(
+    string Title,
+    string Description,
+    Guid CategoryId,
+    string JobType,
+    string Region,
+    string PayType,
+    decimal PayMin,
+    decimal PayMax,
+    string Currency,
+    string ExperienceLevel,
+    short? HoursPerWeek,
+    DateTime? ClosesAt,
+    IReadOnlyList<string> Skills);
+
+public sealed record JobDetailDto(
+    Guid Id,
+    string Title,
+    string Slug,
+    string Description,
+    Guid CategoryId,
+    string CategoryName,
+    string CategorySlug,
+    Guid EmployerProfileId,
+    string CompanyName,
+    string CompanySlug,
+    string? CompanyWebsite,
+    string JobType,
+    string Region,
+    string PayType,
+    decimal PayMin,
+    decimal PayMax,
+    string Currency,
+    string ExperienceLevel,
+    short? HoursPerWeek,
+    string Status,
+    string? StatusReason,
+    DateTime? PublishedAt,
+    DateTime? ClosesAt,
+    int ViewCount,
+    int ApplicantCount,
+    IReadOnlyList<string> Skills,
+    bool CanEdit,
+    DateTime CreatedAt,
+    DateTime UpdatedAt);
+
+public sealed record JobMineDto(
+    Guid Id,
+    string Title,
+    string Slug,
+    string Status,
+    string? StatusReason,
+    string CategoryName,
+    string JobType,
+    string PayType,
+    decimal PayMin,
+    decimal PayMax,
+    string Currency,
+    DateTime? PublishedAt,
+    DateTime CreatedAt,
+    int ViewCount,
+    int ApplicantCount);
+
+public sealed record JobMessage(bool Published, string Slug, string Status);
