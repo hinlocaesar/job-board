@@ -1,0 +1,7 @@
+# pnpm 12 reads project settings from this file (not package.json).
+# allowBuilds (pnpm >= 10.26) explicitly approves dependency build scripts.
+allowBuilds:
+  esbuild: true
+  vue-demi: true
+  tailwindcss: true
+  unplugin-lightningcss: true
