@@ -22,6 +22,10 @@ public class Job
     public JobStatus Status { get; set; } = JobStatus.Pending;
     /// <summary>Why an admin flagged/rejected the posting.</summary>
     public string? StatusReason { get; set; }
+    /// <summary>Set when the posting was imported from an external feed (e.g. "remotive"); null for employer-posted jobs.</summary>
+    public string? Source { get; set; }
+    /// <summary>The id this job has in the external feed. Together with <see cref="Source"/> it makes imports idempotent.</summary>
+    public string? SourceId { get; set; }
     public DateTime? PublishedAt { get; set; }
     public DateTime? ClosesAt { get; set; }
     public int ViewCount { get; set; }

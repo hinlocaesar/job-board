@@ -107,6 +107,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
             e.Property(x => x.Title).HasMaxLength(200).IsRequired();
             e.Property(x => x.Slug).HasMaxLength(220).IsRequired();
             e.HasIndex(x => x.Slug).IsUnique();
+            e.Property(x => x.Source).HasMaxLength(50);
+            e.Property(x => x.SourceId).HasMaxLength(100);
+            // One row per external posting: re-running an import updates nothing new.
+            e.HasIndex(x => new { x.Source, x.SourceId })
+                .IsUnique()
+                .HasFilter("\"source\" IS NOT NULL AND \"source_id\" IS NOT NULL");
             e.Property(x => x.PayMin).HasColumnType("numeric(12,2)");
             e.Property(x => x.PayMax).HasColumnType("numeric(12,2)");
             e.Property(x => x.JobType).HasConversion<int>();

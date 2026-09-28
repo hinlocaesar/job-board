@@ -43,6 +43,8 @@ public sealed record JobDetailDto(
     int ApplicantCount,
     IReadOnlyList<string> Skills,
     bool CanEdit,
+    /// <summary>External feed this posting was imported from, or null when an employer posted it.</summary>
+    string? Source,
     DateTime CreatedAt,
     DateTime UpdatedAt);
 

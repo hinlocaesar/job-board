@@ -1,4 +1,5 @@
 using JobBoard.Api.Common;
+using JobBoard.Api.Features.Imports;
 using JobBoard.Api.Services;
 using JobBoard.Domain.Enums;
 using JobBoard.Infrastructure.Data;
@@ -18,12 +19,18 @@ public sealed class AdminController : ApiControllerBase
     private readonly AppDbContext _db;
     private readonly IAuditService _audit;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ExternalJobImporter _importer;
 
-    public AdminController(AppDbContext db, IAuditService audit, UserManager<ApplicationUser> userManager)
+    public AdminController(
+        AppDbContext db,
+        IAuditService audit,
+        UserManager<ApplicationUser> userManager,
+        ExternalJobImporter importer)
     {
         _db = db;
         _audit = audit;
         _userManager = userManager;
+        _importer = importer;
     }
 
     public sealed record JobQueueDto(
@@ -39,6 +46,10 @@ public sealed class AdminController : ApiControllerBase
         int JobCount, int ApplicationCount);
 
     public sealed record AuditDto(long Id, Guid? ActorUserId, string Action, string EntityType, string EntityId, string? Details, string? Ip, DateTime CreatedAt);
+
+    public sealed record ImportSourceDto(string Source, int Fetched, int Created, int Skipped, int Failed, string? Error);
+
+    public sealed record ImportSummaryDto(int Created, int Skipped, int Failed, IReadOnlyList<ImportSourceDto> Sources);
 
     /// <summary>Queue of postings, optionally filtered by status (defaults to Pending).</summary>
     [HttpGet("jobs")]
@@ -210,5 +221,32 @@ public sealed class AdminController : ApiControllerBase
             .ToListAsync(cancellationToken);
 
         return Ok(events);
+    }
+
+    /// <summary>
+    /// Pull jobs from the free external feeds (Remotive, Jobicy). Idempotent —
+    /// postings already imported are skipped. Every import is written to the audit log.
+    /// </summary>
+    [HttpPost("import/remote-jobs")]
+    public async Task<ActionResult<ImportSummaryDto>> ImportRemoteJobs(
+        [FromQuery] int limit = 100,
+        CancellationToken cancellationToken = default)
+    {
+        var summary = await _importer.ImportAsync(Math.Clamp(limit, 1, 200), cancellationToken);
+
+        await _audit.RecordAsync(
+            "jobs.imported",
+            "job",
+            "external-feeds",
+            new { summary.Created, summary.Skipped, summary.Failed, sources = summary.Sources.Select(s => s.Source) },
+            CurrentUserId,
+            ClientIp,
+            cancellationToken);
+
+        return Ok(new ImportSummaryDto(
+            summary.Created,
+            summary.Skipped,
+            summary.Failed,
+            summary.Sources.Select(s => new ImportSourceDto(s.Source, s.Fetched, s.Created, s.Skipped, s.Failed, s.Error)).ToList()));
     }
 }

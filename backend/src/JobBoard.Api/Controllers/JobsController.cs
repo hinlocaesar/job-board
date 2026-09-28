@@ -290,6 +290,7 @@ public sealed class JobsController : ApiControllerBase
         includeApplicantCount ? job.Applications.Count : 0,
         job.Skills.Select(s => s.SkillName).ToList(),
         canEdit,
+        job.Source,
         job.CreatedAt,
         job.UpdatedAt);
 }

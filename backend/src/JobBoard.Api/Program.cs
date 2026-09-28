@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using FluentValidation;
 using JobBoard.Api.Common;
 using JobBoard.Api.Features.Auth;
+using JobBoard.Api.Features.Imports;
 using JobBoard.Api.Options;
 using JobBoard.Api.Services;
 using JobBoard.Identity;
@@ -89,6 +90,14 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddHttpContextAccessor();
 
+// External job feeds (free, key-less). One HttpClient per source so a slow feed
+// cannot block the others; short timeout because this runs during a request.
+builder.Services.AddHttpClient<RemotiveJobSource>(client => client.Timeout = TimeSpan.FromSeconds(20));
+builder.Services.AddHttpClient<JobicyJobSource>(client => client.Timeout = TimeSpan.FromSeconds(20));
+builder.Services.AddScoped<IExternalJobSource>(sp => sp.GetRequiredService<RemotiveJobSource>());
+builder.Services.AddScoped<IExternalJobSource>(sp => sp.GetRequiredService<JobicyJobSource>());
+builder.Services.AddScoped<ExternalJobImporter>();
+
 // Rate limiting: a global ceiling plus a strict policy for authentication endpoints.
 builder.Services.AddRateLimiter(options =>
 {
@@ -158,6 +167,23 @@ app.MapControllers();
 app.MapGet("/health", () => Results.Ok(new { status = "ok", utc = DateTime.UtcNow }));
 
 await DbSeeder.SeedAsync(app.Services);
+
+// Optional: pull fresh jobs from the public feeds on boot (dev convenience).
+// Existing postings are skipped, so this is safe to leave enabled.
+if (app.Environment.IsDevelopment() && app.Configuration.GetValue("Imports:RemoteJobsOnStartup", false))
+{
+    using var scope = app.Services.CreateScope();
+    var importer = scope.ServiceProvider.GetRequiredService<ExternalJobImporter>();
+    try
+    {
+        var summary = await importer.ImportAsync(app.Configuration.GetValue("Imports:LimitPerSource", 100), CancellationToken.None);
+        app.Logger.LogInformation("Startup import from external feeds: {Created} created, {Skipped} skipped.", summary.Created, summary.Skipped);
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogWarning(ex, "Startup import from external feeds failed; the app continues without it.");
+    }
+}
 
 app.Run();
 

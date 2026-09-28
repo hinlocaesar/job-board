@@ -66,7 +66,7 @@ public sealed class EmailSender : IEmailSender
 
         using var client = new SmtpClient();
         await client.ConnectAsync(host, port, SecureSocketOptions.Auto, cancellationToken);
-        if (!string.IsNullOrEmpty(user))
+        if (!string.IsNullOrEmpty(user) && !string.IsNullOrEmpty(password))
             await client.AuthenticateAsync(user, password, cancellationToken);
         await client.SendAsync(message, cancellationToken);
         await client.DisconnectAsync(true, cancellationToken);
