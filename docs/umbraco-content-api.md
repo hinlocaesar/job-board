@@ -169,9 +169,12 @@ Windows PowerShell 5.1).
 
 ## 7. Backoffice notes
 
-- Umbraco backoffice: `https://localhost:7123/umbraco` → `admin@jobboard.local` /
-  `JobBoard123!` (unattended install credentials live in the **gitignored**
-  `appsettings.Local.json`; change them for anything but local dev).
+- Umbraco backoffice: `https://localhost:7123/umbraco`. The unattended-install
+  credentials are whatever **you** set in the gitignored
+  `backend/src/JobBoard.Cms/appsettings.Local.json`
+  (`Umbraco:CMS:Unattended:UnattendedUserName` / `…UserEmail` / `…UserPassword`).
+  They are deliberately not committed — see `.env.example` for the same values as
+  environment variables.
 - After editing content types, rebuild **Settings → Examine Management →
   DeliveryApiContentIndex** (the seeder does this automatically on boot when it
   created something).
