@@ -33,6 +33,23 @@ export const AVAILABILITY_OPTIONS = [
   { value: 'ProjectBased', label: 'Project-based' },
 ]
 
+/**
+ * Curated sections for the blue header nav (mirrors the seeded categories).
+ * The results sidebar uses the live category list instead, so this only
+ * needs to cover the main job-seeking entry points.
+ */
+export const NAV_CATEGORIES = [
+  { label: 'All jobs', slug: '' },
+  { label: 'Web development', slug: 'web-development' },
+  { label: 'Mobile development', slug: 'mobile-development' },
+  { label: 'Graphic design', slug: 'graphic-design' },
+  { label: 'Virtual assistance', slug: 'virtual-assistance' },
+  { label: 'Customer support', slug: 'customer-support' },
+  { label: 'Digital marketing', slug: 'digital-marketing' },
+  { label: 'Writing & content', slug: 'writing-content' },
+  { label: 'Data & analytics', slug: 'data-analytics' },
+]
+
 export const RATE_PERIOD_OPTIONS = [
   { value: 'Hour', label: 'per hour' },
   { value: 'Day', label: 'per day' },

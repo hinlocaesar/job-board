@@ -7,37 +7,43 @@ defineProps<{ job: JobSearchItem }>()
 </script>
 
 <template>
-  <article class="card transition hover:border-brand-300 hover:shadow-md">
-    <div class="flex items-start justify-between gap-4">
-      <div>
-        <RouterLink
-          :to="{ name: 'job-detail', params: { slug: job.slug } }"
-          class="text-lg font-semibold text-slate-900 hover:text-brand-600"
-        >
+  <!--
+    One anchor per row. No card, no border, no button — the row separates itself
+    with whitespace and a single hairline, and the title is the only thing that
+    needs to be a link.
+  -->
+  <RouterLink
+    :to="{ name: 'job-detail', params: { slug: job.slug } }"
+    class="group block border-b border-slate-200 py-7 transition-colors hover:bg-slate-50/60 sm:px-4 sm:-mx-4 sm:rounded-xl"
+  >
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-x-8">
+      <div class="min-w-0 flex-1">
+        <h3 class="text-[19px] font-semibold leading-snug tracking-tight text-slate-900 transition-colors group-hover:text-brand-600">
           {{ job.title }}
-        </RouterLink>
-        <p class="mt-0.5 text-sm text-slate-500">
-          {{ job.companyName }} · {{ job.categoryName }}
+        </h3>
+        <p class="mt-1 flex flex-wrap items-center gap-x-2 text-[15px] text-slate-600">
+          <span>{{ job.companyName }}</span>
+          <span class="text-slate-300" aria-hidden="true">·</span>
+          <span>{{ job.categoryName }}</span>
+          <span class="text-slate-300" aria-hidden="true">·</span>
+          <span>{{ humanize(job.region) }}</span>
         </p>
       </div>
-      <span class="shrink-0 text-right text-sm font-semibold text-emerald-700">
-        {{ formatPay(job) }}
-      </span>
+
+      <div class="flex shrink-0 items-baseline gap-4 sm:text-right">
+        <p class="nums text-[17px] font-medium text-slate-900">{{ formatPay(job) }}</p>
+        <p class="w-20 shrink-0 text-[13px] text-slate-500">{{ formatRelative(job.publishedAt) }}</p>
+      </div>
     </div>
 
-    <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-      <span class="chip">{{ humanize(job.jobType) }}</span>
-      <span class="chip">{{ humanize(job.experienceLevel) }}</span>
-      <span class="chip">{{ humanize(job.region) }}</span>
-      <span v-if="job.hoursPerWeek" class="chip">{{ job.hoursPerWeek }} hrs/week</span>
-      <span class="text-slate-400">Posted {{ formatRelative(job.publishedAt) }}</span>
-    </div>
-
-    <div v-if="job.skills?.length" class="mt-3 flex flex-wrap gap-1.5">
-      <span v-for="skill in job.skills.slice(0, 6)" :key="skill" class="chip bg-brand-50 text-brand-700">
-        {{ skill }}
+    <p class="mt-2.5 flex flex-wrap items-center gap-x-3 text-[13px] text-slate-500">
+      <span>{{ humanize(job.jobType) }}</span>
+      <span>{{ humanize(job.experienceLevel) }}</span>
+      <span v-if="job.hoursPerWeek" class="nums">{{ job.hoursPerWeek }} hrs/week</span>
+      <span v-if="job.skills?.length" class="truncate">
+        {{ job.skills.slice(0, 4).join(', ') }}
+        <template v-if="job.skills.length > 4"> +{{ job.skills.length - 4 }}</template>
       </span>
-      <span v-if="job.skills.length > 6" class="text-xs text-slate-400">+{{ job.skills.length - 6 }} more</span>
-    </div>
-  </article>
+    </p>
+  </RouterLink>
 </template>

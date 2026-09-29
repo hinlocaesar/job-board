@@ -42,8 +42,8 @@ describe('JobCard', () => {
     expect(wrapper.text()).toContain('Full Time')
     expect(wrapper.text()).toContain('40 hrs/week')
     expect(wrapper.text()).toContain('Vue.js')
-    // only the first six skills are shown, the rest collapse
-    expect(wrapper.text()).toContain('+1 more')
+    // only the first four skills are shown, the rest collapse to a count
+    expect(wrapper.text()).toContain('+3')
     expect(wrapper.text()).not.toContain('GraphQL')
   })
 
@@ -65,15 +65,7 @@ describe('PaginationBar', () => {
 
     const buttons = wrapper.findAll('button')
     // 5 pages fits the window without ellipses: Prev, 1..5, Next
-    expect(buttons.map((b) => b.text())).toEqual([
-      '← Prev',
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-      'Next →',
-    ])
+    expect(buttons.map((b) => b.text())).toEqual(['Prev', '1', '2', '3', '4', '5', 'Next'])
 
     await buttons[buttons.length - 1].trigger('click')
     expect(wrapper.emitted('page-change')).toEqual([[4]])

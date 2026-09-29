@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Icon from './Icon.vue'
+
 const props = defineProps<{ page: number; totalPages: number; disabled?: boolean }>()
 const emit = defineEmits<{ 'page-change': [page: number] }>()
 
@@ -31,25 +33,46 @@ function go(page: number): void {
 </script>
 
 <template>
-  <nav v-if="totalPages > 1" class="flex flex-wrap items-center justify-center gap-1.5" aria-label="Pagination">
-    <button class="btn-secondary" type="button" :disabled="disabled || page <= 1" @click="go(page - 1)">← Prev</button>
+  <nav
+    v-if="totalPages > 1"
+    class="flex flex-wrap items-center justify-center gap-1.5"
+    aria-label="Pagination"
+  >
+    <button
+      class="btn-ghost btn-sm"
+      type="button"
+      :disabled="disabled || page <= 1"
+      aria-label="Previous page"
+      @click="go(page - 1)"
+    >
+      <Icon name="chevron-right" :size="15" class="rotate-180" />
+      Prev
+    </button>
 
     <template v-for="(entry, index) in pages()" :key="`${entry}-${index}`">
-      <span v-if="entry === '…'" class="px-2 text-slate-400">…</span>
+      <span v-if="entry === '…'" class="grid h-8 w-8 place-items-center text-slate-400">…</span>
       <button
         v-else
         type="button"
-        class="h-9 min-w-9 rounded-lg px-3 text-sm font-medium"
-        :class="entry === page ? 'bg-brand-600 text-white' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'"
+        class="nums grid h-8 min-w-8 place-items-center rounded-full px-2 text-[14px] font-medium transition-colors"
+        :class="entry === page ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'"
         :disabled="disabled"
+        :aria-current="entry === page ? 'page' : undefined"
         @click="go(entry)"
       >
         {{ entry }}
       </button>
     </template>
 
-    <button class="btn-secondary" type="button" :disabled="disabled || page >= totalPages" @click="go(page + 1)">
-      Next →
+    <button
+      class="btn-ghost btn-sm"
+      type="button"
+      :disabled="disabled || page >= totalPages"
+      aria-label="Next page"
+      @click="go(page + 1)"
+    >
+      Next
+      <Icon name="chevron-right" :size="15" />
     </button>
   </nav>
 </template>

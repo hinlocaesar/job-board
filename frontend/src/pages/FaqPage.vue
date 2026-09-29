@@ -7,6 +7,8 @@ import { renderRichText } from '../api/richText'
 import AlertBox from '../components/common/AlertBox.vue'
 import RichText from '../components/common/RichText.vue'
 import Spinner from '../components/common/Spinner.vue'
+import EmptyState from '../components/common/EmptyState.vue'
+import Icon from '../components/common/Icon.vue'
 import { siteOrigin, useSeo } from '../composables/useSeo'
 
 useSeo({
@@ -69,44 +71,77 @@ const faqs = computed<FaqItem[]>(() => {
 </script>
 
 <template>
-  <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-    <header class="border-b border-slate-200 pb-6">
-      <h1 class="text-3xl font-bold text-slate-900">{{ propString(page, 'heading') || 'Help & FAQ' }}</h1>
-      <p class="mt-2 text-slate-600">{{ propString(page, 'intro') || 'Everything you need to know about using JobBoard.' }}</p>
-    </header>
+  <div class="border-b border-slate-200">
+    <div class="shell py-4">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <RouterLink :to="{ name: 'home' }">Home</RouterLink>
+        <span class="breadcrumb-sep" aria-hidden="true">›</span>
+        <span class="font-medium text-slate-900">Help &amp; FAQ</span>
+      </nav>
+    </div>
+  </div>
 
-    <div class="mt-6">
+  <div class="shell-prose py-16 sm:py-24">
+    <h1 class="display text-[40px] sm:text-[56px]">
+      {{ propString(page, 'heading') || 'Help & FAQ' }}
+    </h1>
+    <p class="muted mt-5 text-[19px]">
+      {{ propString(page, 'intro') || 'Everything you need to know about using JobBoard.' }}
+    </p>
+
+    <div class="mt-12">
       <Spinner v-if="loading" label="Loading FAQ…" />
 
       <AlertBox v-else-if="error" :message="error">
-        <p class="mt-2 text-sm">
-          <RouterLink class="font-medium underline" :to="{ name: 'jobs' }">Browse jobs instead →</RouterLink>
+        <p class="mt-2 text-[15px]">
+          <RouterLink class="link" :to="{ name: 'jobs' }">Browse jobs instead</RouterLink>
         </p>
       </AlertBox>
 
       <template v-else>
         <!-- Rich intro from the CMS, if present -->
-        <RichText v-if="renderRichText(page?.properties?.body)" :html="renderRichText(page?.properties?.body)" />
+        <RichText
+          v-if="renderRichText(page?.properties?.body)"
+          :html="renderRichText(page?.properties?.body)"
+        />
 
-        <div v-if="faqs.length" class="mt-4 divide-y divide-slate-200 rounded-xl border border-slate-200">
-          <section v-for="(faq, index) in faqs" :key="index">
-            <button
-              class="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
-              type="button"
-              @click="openIndex = openIndex === index ? null : index"
-            >
-              <span class="font-medium text-slate-900">{{ faq.question }}</span>
-              <span class="text-slate-400">{{ openIndex === index ? '−' : '+' }}</span>
-            </button>
-            <div v-if="openIndex === index" class="px-5 pb-5">
+        <div v-if="faqs.length" class="mt-10">
+          <section v-for="(faq, index) in faqs" :key="index" class="border-b border-slate-200">
+            <h2>
+              <button
+                class="flex w-full items-center justify-between gap-6 py-5 text-left"
+                type="button"
+                :aria-expanded="openIndex === index"
+                @click="openIndex = openIndex === index ? null : index"
+              >
+                <span
+                  class="text-[19px] font-medium transition-colors"
+                  :class="openIndex === index ? 'text-brand-600' : 'text-slate-900'"
+                >
+                  {{ faq.question }}
+                </span>
+                <span class="shrink-0 text-slate-400">
+                  <Icon :name="openIndex === index ? 'minus' : 'plus'" :size="18" />
+                </span>
+              </button>
+            </h2>
+            <div v-if="openIndex === index" class="pb-6">
               <RichText :html="faq.answerHtml" />
             </div>
           </section>
         </div>
 
-        <p v-else-if="page" class="mt-6 rounded-lg bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
-          No questions have been added to this page yet.
-        </p>
+        <EmptyState
+          v-else-if="page"
+          class="mt-10"
+          title="No questions yet"
+          message="Nothing has been added to this page so far."
+        />
+
+        <div class="mt-12 flex flex-wrap gap-3">
+          <RouterLink class="btn-primary" :to="{ name: 'jobs' }">Browse jobs</RouterLink>
+          <RouterLink class="btn-secondary" :to="{ name: 'register' }">Create a profile</RouterLink>
+        </div>
       </template>
     </div>
   </div>

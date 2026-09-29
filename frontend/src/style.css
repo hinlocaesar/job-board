@@ -1,33 +1,123 @@
+@import '@fontsource-variable/inter/wght.css';
 @import 'tailwindcss';
 
+/**
+ * Design tokens — "Apple".
+ *
+ * The organising principle is that structure comes from whitespace and type
+ * size, not from boxes. Concretely that means:
+ *  - no borders on content containers, and almost no shadows
+ *  - one accent colour, used only for links and the primary action
+ *  - Apple's own neutrals (#f5f5f7 / #1d1d1f / #6e6e73) rather than a generic ramp
+ *  - pill-shaped controls, and tight tracking on large type
+ */
 @theme {
-  --color-brand-50: #eef2ff;
-  --color-brand-100: #e0e7ff;
-  --color-brand-500: #6366f1;
-  --color-brand-600: #4f46e5;
-  --color-brand-700: #4338ca;
-  --font-sans:
-    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  /* Apple's greys. `slate` is overridden so every existing utility inherits them. */
+  --color-slate-50: #fbfbfd;
+  --color-slate-100: #f5f5f7;
+  --color-slate-200: #e8e8ed;
+  --color-slate-300: #d2d2d7;
+  --color-slate-400: #a1a1a6;
+  --color-slate-500: #86868b;
+  --color-slate-600: #6e6e73;
+  --color-slate-700: #515154;
+  --color-slate-800: #3a3a3c;
+  --color-slate-900: #1d1d1f;
+  --color-slate-950: #000000;
+
+  /* Apple's blue, the single accent. */
+  --color-brand-50: #f0f7ff;
+  --color-brand-100: #dceeff;
+  --color-brand-200: #b8dcff;
+  --color-brand-300: #7fc0ff;
+  --color-brand-400: #3a9bff;
+  --color-brand-500: #0077ed;
+  --color-brand-600: #0071e3;
+  --color-brand-700: #0064c4;
+  --color-brand-800: #0058a3;
+  --color-brand-900: #004a85;
+  --color-brand-950: #002b4d;
+
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Generous radii: pills for controls, soft cards for media. */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
-    @apply bg-white text-slate-800 antialiased;
+    @apply bg-white text-[17px] leading-relaxed text-slate-800 antialiased;
+    letter-spacing: -0.011em;
   }
 
   h1,
   h2,
-  h3 {
-    @apply text-balance;
+  h3,
+  h4 {
+    @apply font-semibold tracking-tight text-slate-900;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-4 outline-brand-600;
+  }
+
+  ::selection {
+    @apply bg-brand-200 text-brand-950;
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/** Tabular figures so pay ranges line up. */
+@utility nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/**
+ * Display type. Large, semibold and tightly tracked — the single biggest lever
+ * for reading as "considered" rather than as a template.
+ */
+@utility display {
+  @apply font-semibold tracking-[-0.03em] text-balance;
+}
+
+/** Apple's small-caps kicker, used above hero copy. */
+@utility kicker {
+  @apply text-[13px] font-medium tracking-wide text-brand-600;
+}
+
+/** Secondary body copy, Apple's muted grey. */
+@utility muted {
+  @apply text-slate-600;
+}
+
+/* ------------------------------------------------------------------ *
+ * Buttons — pills, like Apple's call to actions
+ * ------------------------------------------------------------------ */
+
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60;
+  @apply inline-flex select-none items-center justify-center gap-1.5 rounded-full px-5 py-2.5
+         text-[15px] font-medium whitespace-nowrap
+         transition-colors duration-150
+         disabled:pointer-events-none disabled:opacity-50;
 }
 
 @layer components {
@@ -36,63 +126,245 @@
   }
 
   .btn-secondary {
-    @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50;
+    @apply btn bg-slate-100 text-slate-900 hover:bg-slate-200;
+  }
+
+  .btn-dark {
+    @apply btn bg-slate-900 text-white hover:bg-slate-800;
+  }
+
+  /* Used on a dark background. */
+  .btn-on-dark {
+    @apply btn bg-white text-slate-900 hover:bg-slate-100;
+  }
+
+  .btn-ghost {
+    @apply btn text-brand-600 hover:bg-brand-50;
   }
 
   .btn-danger {
     @apply btn bg-rose-600 text-white hover:bg-rose-700;
   }
 
+  .btn-sm {
+    @apply px-4 py-1.5 text-[13px];
+  }
+
+  .btn-lg {
+    @apply px-7 py-3 text-[17px];
+  }
+
+  /* -------------------------------------------------------------- *
+   * Form controls
+   * -------------------------------------------------------------- */
+
   .input {
-    @apply w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100;
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[15px] text-slate-900
+           transition-colors placeholder:text-slate-400
+           hover:border-slate-300
+           focus:border-brand-600 focus:outline-none focus:ring-4 focus:ring-brand-600/10;
   }
 
   .label {
-    @apply mb-1 block text-sm font-medium text-slate-700;
+    @apply mb-1.5 block text-[13px] font-medium text-slate-600;
   }
+
+  /* -------------------------------------------------------------- *
+   * Surfaces — no borders. Whitespace and background shifts do the work.
+   * -------------------------------------------------------------- */
 
   .card {
-    @apply rounded-xl border border-slate-200 bg-white p-5 shadow-sm;
+    @apply rounded-2xl bg-white p-6;
   }
 
+  /** Apple grey panel, for the rare block that needs a different weight. */
+  .panel {
+    @apply rounded-2xl bg-slate-100 p-6;
+  }
+
+  /** The alternating section background. */
+  .section-alt {
+    @apply bg-slate-100;
+  }
+
+  .meta-row {
+    @apply flex items-baseline justify-between gap-4 border-b border-slate-200 py-3 last:border-b-0;
+  }
+
+  .meta-key {
+    @apply text-[15px] text-slate-600;
+  }
+
+  .meta-value {
+    @apply text-[15px] font-medium text-slate-900;
+  }
+
+  /* -------------------------------------------------------------- *
+   * Tags — pills
+   * -------------------------------------------------------------- */
+
   .chip {
-    @apply inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700;
+    @apply inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-[13px] font-medium text-slate-700;
+  }
+
+  .chip-accent {
+    @apply inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-[13px] font-medium text-brand-700;
   }
 
   .badge {
-    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold;
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[12px] font-medium;
+  }
+
+  /* -------------------------------------------------------------- *
+   * Links & headings
+   * -------------------------------------------------------------- */
+
+  /* Apple's signature: blue, never underlined, underline only on hover. */
+  .link {
+    @apply text-brand-600 hover:underline;
+  }
+
+  .link-underline {
+    @apply text-brand-600 hover:underline;
+  }
+
+  .section-title {
+    @apply text-[28px] leading-tight sm:text-[36px];
+  }
+
+  .page-title {
+    @apply text-[40px] leading-[1.06] sm:text-[56px];
+  }
+
+  .arrow-link {
+    @apply inline-flex items-center gap-1 text-brand-600 hover:underline;
+  }
+
+  .arrow-link > svg {
+    @apply transition-transform duration-150;
+  }
+
+  .arrow-link:hover > svg {
+    @apply translate-x-0.5;
+  }
+
+  /* -------------------------------------------------------------- *
+   * Layout
+   * -------------------------------------------------------------- */
+
+  .shell {
+    @apply mx-auto w-full max-w-6xl px-6;
+  }
+
+  /** Reading measure for long-form. */
+  .shell-prose {
+    @apply mx-auto w-full max-w-3xl px-6;
+  }
+
+  /** Very wide measure, for centred marketing copy. */
+  .shell-wide {
+    @apply mx-auto w-full max-w-4xl px-6 text-center;
+  }
+
+  .section {
+    @apply py-20 sm:py-28;
+  }
+
+  .rule {
+    @apply border-slate-200;
+  }
+
+  .nav-scroll {
+    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent 100%);
+  }
+
+  /* Breadcrumbs — present but quiet. */
+  .breadcrumb {
+    @apply flex flex-wrap items-center gap-1.5 text-[13px] text-slate-500;
+  }
+
+  .breadcrumb a {
+    @apply text-brand-600 hover:underline;
+  }
+
+  .breadcrumb-sep {
+    @apply text-slate-300;
   }
 }
 
-/* Rich-text (blog/FAQ) content */
+/* ------------------------------------------------------------------ *
+ * Rich text (blog, FAQ, landing pages)
+ * ------------------------------------------------------------------ */
+
 .prose-basic {
-  @apply space-y-4 text-slate-700 leading-relaxed;
+  @apply text-[19px] leading-[1.68] text-slate-800;
+}
+
+.prose-basic > * + * {
+  @apply mt-5;
 }
 
 .prose-basic h2 {
-  @apply mt-6 text-xl font-semibold text-slate-900;
+  @apply mt-12 text-[28px] leading-tight text-slate-900;
 }
 
 .prose-basic h3 {
-  @apply mt-4 text-lg font-semibold text-slate-900;
+  @apply mt-9 text-[22px] leading-snug text-slate-900;
+}
+
+.prose-basic h4 {
+  @apply mt-7 text-[19px] text-slate-900;
 }
 
 .prose-basic p {
-  @apply text-slate-700;
-}
-
-.prose-basic ul {
-  @apply list-disc space-y-1 pl-6;
-}
-
-.prose-basic ol {
-  @apply list-decimal space-y-1 pl-6;
+  @apply text-pretty;
 }
 
 .prose-basic a {
-  @apply text-brand-600 underline;
+  @apply text-brand-600 hover:underline;
 }
 
 .prose-basic strong {
   @apply font-semibold text-slate-900;
+}
+
+.prose-basic ul {
+  @apply list-disc space-y-2 pl-6 marker:text-slate-400;
+}
+
+.prose-basic ol {
+  @apply list-decimal space-y-2 pl-6 marker:text-slate-400;
+}
+
+.prose-basic li > ul,
+.prose-basic li > ol {
+  @apply mt-2;
+}
+
+.prose-basic blockquote {
+  @apply border-l-2 border-slate-300 pl-6 text-slate-700;
+}
+
+.prose-basic hr {
+  @apply my-10 border-slate-200;
+}
+
+.prose-basic code {
+  @apply rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[0.85em] text-slate-900;
+}
+
+.prose-basic pre {
+  @apply overflow-x-auto rounded-2xl bg-slate-900 p-5 text-[14px] text-slate-100;
+}
+
+.prose-basic pre code {
+  @apply bg-transparent p-0 text-inherit;
+}
+
+.prose-basic img {
+  @apply rounded-2xl;
+}
+
+.prose-basic figcaption {
+  @apply mt-3 text-[14px] text-slate-500;
 }

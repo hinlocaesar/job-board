@@ -73,7 +73,9 @@ describe.skipIf(!live)('pages rendered against the live API + CMS', () => {
     const text = wrapper.text()
     expect(text).toContain('Find remote work')
     expect(text).toMatch(/\/hour|\/month|project/)
-    expect(wrapper.findAll('article').length).toBeGreaterThan(0)
+    // Each result row is a single link to the job detail page.
+    const rows = wrapper.findAll('a[href^="/jobs/"]')
+    expect(rows.length).toBeGreaterThan(0)
   })
 
   it('job detail renders the description and apply box', async () => {
@@ -82,7 +84,7 @@ describe.skipIf(!live)('pages rendered against the live API + CMS', () => {
 
     const wrapper = await renderPage(JobDetailPage, `/jobs/${job.slug}`)
     const text = wrapper.text()
-    expect(text).toContain('Job description')
+    expect(text).toContain('About the role')
     expect(text).toContain('Apply for this job')
     // useSeo() writes the head tags on the client (the prerender covers SSR).
     expect(document.title).toBe(`${job.title} · JobBoard`)
@@ -120,6 +122,6 @@ describe.skipIf(!live)('pages rendered against the live API + CMS', () => {
 
   it('404 page renders for unknown routes', async () => {
     const wrapper = await renderPage(NotFoundPage, '/definitely-not-a-page')
-    expect(wrapper.text()).toContain("couldn't find that page")
+    expect(wrapper.text()).toContain('This page has moved on')
   })
 })

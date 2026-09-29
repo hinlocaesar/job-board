@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
+import Brand from './Brand.vue'
 
 const auth = useAuthStore()
 const route = useRoute()
@@ -13,6 +14,24 @@ const navLinks = [
   { to: '/blog', label: 'Blog' },
   { to: '/faq', label: 'FAQ' },
 ]
+
+const initials = computed(() =>
+  (auth.user?.fullName ?? '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join(''),
+)
+
+const roleLabel = computed(() => {
+  const role = auth.roles[0]
+  return role ? role.charAt(0).toUpperCase() + role.slice(1) : ''
+})
+
+function isActive(to: string): boolean {
+  return route.path === to || route.path.startsWith(`${to}/`)
+}
 
 function closeMenu(): void {
   menuOpen.value = false
@@ -26,105 +45,140 @@ async function signOut(): Promise<void> {
 </script>
 
 <template>
-  <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-    <div class="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 sm:px-6">
-      <RouterLink :to="{ name: 'home' }" class="flex items-center gap-2 font-semibold text-slate-900" @click="closeMenu">
-        <span class="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-sm font-bold text-white">JB</span>
-        <span class="text-lg">JobBoard</span>
-      </RouterLink>
+  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl backdrop-saturate-150">
+    <div class="shell flex h-12 items-center gap-8">
+      <Brand @click="closeMenu" />
 
-      <nav class="hidden items-center gap-1 md:flex">
+      <nav class="hidden items-center gap-7 md:flex" aria-label="Main">
         <RouterLink
           v-for="link in navLinks"
           :key="link.to"
           :to="link.to"
-          class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-          :class="{ 'bg-slate-100 text-slate-900': route.path === link.to }"
+          class="text-[13px] text-slate-800 transition-colors hover:text-brand-600"
+          :class="isActive(link.to) ? 'text-brand-600' : ''"
+          :aria-current="isActive(link.to) ? 'page' : undefined"
         >
           {{ link.label }}
         </RouterLink>
         <RouterLink
           v-if="auth.isEmployer || auth.isAdmin"
           :to="{ name: 'dashboard' }"
-          class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+          class="text-[13px] text-slate-800 transition-colors hover:text-brand-600"
         >
-          Employer dashboard
+          Dashboard
         </RouterLink>
         <RouterLink
           v-if="auth.isAdmin"
           :to="{ name: 'admin' }"
-          class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+          class="text-[13px] text-slate-800 transition-colors hover:text-brand-600"
         >
           Admin
         </RouterLink>
       </nav>
 
-      <div class="ml-auto hidden items-center gap-2 md:flex">
+      <div class="ml-auto hidden items-center gap-5 md:flex">
         <template v-if="!auth.isAuthenticated">
-          <RouterLink :to="{ name: 'login' }" class="btn-secondary">Log in</RouterLink>
-          <RouterLink :to="{ name: 'register' }" class="btn-primary">Sign up</RouterLink>
+          <RouterLink :to="{ name: 'login' }" class="text-[13px] text-brand-600 hover:underline">Log in</RouterLink>
+          <RouterLink :to="{ name: 'register' }" class="btn-primary btn-sm">Sign up</RouterLink>
         </template>
+
         <template v-else>
-          <span class="text-sm text-slate-500">
-            {{ auth.user?.fullName }}
-            <span class="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-xs uppercase text-slate-500">
-              {{ auth.roles[0] }}
+          <RouterLink v-if="auth.isWorker" :to="{ name: 'applications' }" class="text-[13px] text-slate-800 hover:text-brand-600">
+            Applications
+          </RouterLink>
+          <RouterLink v-if="auth.isWorker" :to="{ name: 'profile' }" class="text-[13px] text-slate-800 hover:text-brand-600">
+            Profile
+          </RouterLink>
+          <span class="inline-flex items-center gap-2">
+            <span
+              class="grid h-6 w-6 place-items-center rounded-full bg-slate-900 text-[10px] font-semibold text-white"
+              aria-hidden="true"
+            >
+              {{ initials || '·' }}
+            </span>
+            <span class="leading-tight">
+              <span class="block max-w-[11ch] truncate text-[12px] font-medium text-slate-900">
+                {{ auth.user?.fullName }}
+              </span>
+              <span v-if="roleLabel" class="block text-[10px] text-slate-500">{{ roleLabel }}</span>
             </span>
           </span>
-          <RouterLink v-if="auth.isWorker" :to="{ name: 'applications' }" class="btn-secondary">My applications</RouterLink>
-          <RouterLink v-if="auth.isWorker" :to="{ name: 'profile' }" class="btn-secondary">Profile</RouterLink>
-          <button class="btn-secondary" type="button" @click="signOut">Log out</button>
+          <button class="text-[13px] text-slate-800 hover:text-brand-600" type="button" @click="signOut">
+            Log out
+          </button>
         </template>
       </div>
 
       <button
-        class="ml-auto grid h-10 w-10 place-items-center rounded-lg border border-slate-200 md:hidden"
+        class="ml-auto text-[13px] text-slate-900 md:hidden"
         type="button"
-        aria-label="Toggle menu"
+        :aria-expanded="menuOpen"
+        aria-controls="mobile-menu"
         @click="menuOpen = !menuOpen"
       >
-        <span class="text-lg">{{ menuOpen ? '×' : '☰' }}</span>
+        {{ menuOpen ? 'Close' : 'Menu' }}
       </button>
     </div>
 
     <!-- Mobile menu -->
-    <div v-if="menuOpen" class="border-t border-slate-200 bg-white px-4 py-3 md:hidden">
-      <nav class="flex flex-col gap-1">
+    <div v-if="menuOpen" id="mobile-menu" class="border-t border-slate-200 bg-white md:hidden">
+      <nav class="shell flex flex-col gap-4 py-5" aria-label="Mobile">
         <RouterLink
           v-for="link in navLinks"
           :key="link.to"
           :to="link.to"
-          class="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          class="text-[17px] text-slate-900"
           @click="closeMenu"
         >
           {{ link.label }}
         </RouterLink>
+        <RouterLink
+          v-if="auth.isAuthenticated"
+          :to="{ name: 'dashboard' }"
+          class="text-[17px] text-slate-900"
+          @click="closeMenu"
+        >
+          Dashboard
+        </RouterLink>
+        <RouterLink
+          v-if="auth.isWorker"
+          :to="{ name: 'applications' }"
+          class="text-[17px] text-slate-900"
+          @click="closeMenu"
+        >
+          Applications
+        </RouterLink>
+        <RouterLink
+          v-if="auth.isWorker"
+          :to="{ name: 'profile' }"
+          class="text-[17px] text-slate-900"
+          @click="closeMenu"
+        >
+          Profile
+        </RouterLink>
+        <RouterLink
+          v-if="auth.isAdmin"
+          :to="{ name: 'admin' }"
+          class="text-[17px] text-slate-900"
+          @click="closeMenu"
+        >
+          Admin
+        </RouterLink>
 
-        <template v-if="auth.isAuthenticated">
-          <RouterLink v-if="auth.isEmployer" :to="{ name: 'dashboard' }" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" @click="closeMenu">
-            Employer dashboard
-          </RouterLink>
-          <RouterLink v-if="auth.isWorker" :to="{ name: 'profile' }" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" @click="closeMenu">
-            My profile
-          </RouterLink>
-          <RouterLink v-if="auth.isWorker" :to="{ name: 'applications' }" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" @click="closeMenu">
-            My applications
-          </RouterLink>
-          <RouterLink v-if="auth.isAdmin" :to="{ name: 'admin' }" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" @click="closeMenu">
-            Admin
-          </RouterLink>
-          <button class="rounded-lg px-3 py-2 text-left text-sm font-medium text-rose-600 hover:bg-slate-100" type="button" @click="signOut">
-            Log out ({{ auth.user?.fullName }})
-          </button>
-        </template>
-        <template v-else>
-          <RouterLink :to="{ name: 'login' }" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" @click="closeMenu">
-            Log in
-          </RouterLink>
-          <RouterLink :to="{ name: 'register' }" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" @click="closeMenu">
-            Sign up
-          </RouterLink>
-        </template>
+        <div class="mt-2 border-t border-slate-200 pt-4">
+          <template v-if="!auth.isAuthenticated">
+            <div class="flex gap-3">
+              <RouterLink :to="{ name: 'login' }" class="btn-secondary flex-1" @click="closeMenu">Log in</RouterLink>
+              <RouterLink :to="{ name: 'register' }" class="btn-primary flex-1" @click="closeMenu">Sign up</RouterLink>
+            </div>
+          </template>
+          <template v-else>
+            <p class="text-[13px] text-slate-500">
+              Signed in as <strong class="font-medium text-slate-900">{{ auth.user?.fullName }}</strong>
+            </p>
+            <button class="btn-secondary mt-2 w-full" type="button" @click="signOut">Log out</button>
+          </template>
+        </div>
       </nav>
     </div>
   </header>

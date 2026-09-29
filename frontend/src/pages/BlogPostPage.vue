@@ -7,6 +7,7 @@ import { renderRichText, richTextToText } from '../api/richText'
 import AlertBox from '../components/common/AlertBox.vue'
 import RichText from '../components/common/RichText.vue'
 import Spinner from '../components/common/Spinner.vue'
+import Icon from '../components/common/Icon.vue'
 import { formatDate } from '../composables/useFormat'
 import { siteOrigin, useSeo } from '../composables/useSeo'
 
@@ -62,25 +63,43 @@ const body = computed(() => {
 </script>
 
 <template>
-  <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-    <RouterLink :to="{ name: 'blog' }" class="text-sm text-brand-600 hover:underline">← All posts</RouterLink>
+  <div class="border-b border-slate-200">
+    <div class="shell py-4">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <RouterLink :to="{ name: 'home' }">Home</RouterLink>
+        <span class="breadcrumb-sep" aria-hidden="true">›</span>
+        <RouterLink :to="{ name: 'blog' }">Blog</RouterLink>
+        <span class="breadcrumb-sep" aria-hidden="true">›</span>
+        <span class="truncate text-slate-900">{{ propString(post, 'title') || post?.name || 'Post' }}</span>
+      </nav>
+    </div>
+  </div>
+
+  <div class="shell-prose py-16 sm:py-24">
+    <RouterLink :to="{ name: 'blog' }" class="arrow-link text-[15px]">
+      <Icon name="arrow-left" :size="15" />
+      All posts
+    </RouterLink>
 
     <Spinner v-if="loading" label="Loading post…" />
 
     <AlertBox v-else-if="error" :message="error" />
 
     <article v-else-if="post">
-      <header class="mt-4 border-b border-slate-200 pb-6">
-        <h1 class="text-3xl font-bold text-slate-900">
+      <header class="mt-8">
+        <h1 class="display text-[38px] sm:text-[52px]">
           {{ propString(post, 'title') || post.name }}
         </h1>
-        <p class="mt-2 text-sm text-slate-400">
-          {{ formatDate(propString(post, 'publishDate') || post.updateDate) }}
-          <span v-if="propString(post, 'author')"> · {{ propString(post, 'author') }}</span>
+        <p class="mt-5 flex flex-wrap items-center gap-x-2.5 text-[15px] text-slate-500">
+          <time>{{ formatDate(propString(post, 'publishDate') || post.updateDate) }}</time>
+          <template v-if="propString(post, 'author')">
+            <span class="text-slate-300" aria-hidden="true">·</span>
+            <span>{{ propString(post, 'author') }}</span>
+          </template>
         </p>
       </header>
 
-      <div class="mt-6">
+      <div class="mt-10">
         <RichText :html="body" />
       </div>
     </article>

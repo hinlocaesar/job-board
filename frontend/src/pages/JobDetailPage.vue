@@ -8,6 +8,7 @@ import type { JobDetailDto } from '../api/types'
 import AlertBox from '../components/common/AlertBox.vue'
 import Spinner from '../components/common/Spinner.vue'
 import StatusBadge from '../components/common/StatusBadge.vue'
+import Icon from '../components/common/Icon.vue'
 import { siteOrigin, useSeo } from '../composables/useSeo'
 import { errorMessage, formatDate, formatPay, humanize } from '../composables/useFormat'
 import { useAuthStore } from '../stores/auth'
@@ -90,110 +91,97 @@ function sourceLabel(source: string): string {
 </script>
 
 <template>
-  <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-    <RouterLink :to="{ name: 'jobs' }" class="text-sm text-brand-600 hover:underline">← Back to jobs</RouterLink>
+  <div class="border-b border-slate-200">
+    <div class="shell py-4">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <RouterLink :to="{ name: 'home' }">Home</RouterLink>
+        <span class="breadcrumb-sep" aria-hidden="true">›</span>
+        <RouterLink :to="{ name: 'jobs' }">Jobs</RouterLink>
+        <span class="breadcrumb-sep" aria-hidden="true">›</span>
+        <span class="truncate text-slate-900">{{ job?.title ?? 'Job' }}</span>
+      </nav>
+    </div>
+  </div>
 
+  <div class="shell py-14 sm:py-20">
     <Spinner v-if="loading && !job" />
 
     <AlertBox v-else-if="error" :message="error" type="error">
-      <template #default>
-        <p class="mt-2">
-          <RouterLink :to="{ name: 'jobs' }" class="font-medium underline">Browse all jobs</RouterLink>
-        </p>
-      </template>
+      <p class="mt-2">
+        <RouterLink :to="{ name: 'jobs' }" class="link">Browse all jobs</RouterLink>
+      </p>
     </AlertBox>
 
     <template v-else-if="job">
-      <header class="mt-4 border-b border-slate-200 pb-6">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <div class="flex flex-wrap items-center gap-2">
-              <h1 class="text-2xl font-bold text-slate-900 sm:text-3xl">{{ job.title }}</h1>
-              <StatusBadge v-if="job.status !== 'Published'" :status="job.status" />
-            </div>
-            <p class="mt-1 text-slate-500">
-              {{ job.companyName }} · {{ job.categoryName }}
-              <span v-if="job.source" class="ml-1 text-xs text-slate-400">
-                (imported from {{ sourceLabel(job.source) }})
-              </span>
-            </p>
+      <!-- Title block -->
+      <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
+        <div class="max-w-2xl">
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="kicker">{{ job.categoryName }}</span>
+            <StatusBadge v-if="job.status !== 'Published'" :status="job.status" />
           </div>
-          <div class="text-right">
-            <p class="text-lg font-semibold text-emerald-700">{{ formatPay(job) }}</p>
-            <p v-if="job.publishedAt" class="text-xs text-slate-400">Posted {{ formatDate(job.publishedAt) }}</p>
+
+          <h1 class="display mt-4 text-[36px] sm:text-[52px]">{{ job.title }}</h1>
+
+          <p class="mt-4 flex flex-wrap items-center gap-x-2.5 text-[19px] text-slate-600">
+            <span class="text-slate-900">{{ job.companyName }}</span>
+            <span class="text-slate-300" aria-hidden="true">·</span>
+            <span>{{ humanize(job.region) }}</span>
+            <template v-if="job.publishedAt">
+              <span class="text-slate-300" aria-hidden="true">·</span>
+              <span class="text-slate-500">Posted {{ formatDate(job.publishedAt) }}</span>
+            </template>
+          </p>
+
+          <p class="nums mt-8 text-[34px] font-semibold tracking-tight text-slate-900">
+            {{ formatPay(job) }}
+          </p>
+
+          <div class="mt-6 flex flex-wrap gap-2">
+            <span class="chip">{{ humanize(job.jobType) }}</span>
+            <span class="chip">{{ humanize(job.experienceLevel) }}</span>
+            <span v-if="job.hoursPerWeek" class="chip nums">{{ job.hoursPerWeek }} hrs/week</span>
+            <span v-if="job.closesAt" class="chip">Closes {{ formatDate(job.closesAt) }}</span>
           </div>
         </div>
 
-        <div class="mt-4 flex flex-wrap gap-2 text-xs text-slate-500">
-          <span class="chip">{{ humanize(job.jobType) }}</span>
-          <span class="chip">{{ humanize(job.experienceLevel) }}</span>
-          <span class="chip">{{ humanize(job.region) }}</span>
-          <span v-if="job.hoursPerWeek" class="chip">{{ job.hoursPerWeek }} hrs/week</span>
-          <span v-if="job.closesAt" class="chip">Closes {{ formatDate(job.closesAt) }}</span>
-          <span v-if="job.source" class="chip bg-sky-50 text-sky-700">Imported · {{ sourceLabel(job.source) }}</span>
-        </div>
-      </header>
-
-      <div
-        v-if="job.status !== 'Published'"
-        class="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
-      >
-        <strong>Preview.</strong> This job is {{ job.status.toLowerCase() }} and is not visible on the public board.
-        <span v-if="job.statusReason">Reason: {{ job.statusReason }}</span>
-        <RouterLink v-if="job.canEdit" :to="{ name: 'job-edit', params: { id: job.id } }" class="ml-2 font-medium underline">
-          Edit job
-        </RouterLink>
-      </div>
-
-      <div class="mt-6 grid gap-8 lg:grid-cols-[1fr_320px]">
-        <article>
-          <h2 class="text-lg font-semibold text-slate-900">Job description</h2>
-          <p class="mt-3 whitespace-pre-line leading-relaxed text-slate-700">{{ job.description }}</p>
-
-          <div v-if="job.skills?.length" class="mt-6">
-            <h2 class="text-lg font-semibold text-slate-900">Skills</h2>
-            <div class="mt-2 flex flex-wrap gap-2">
-              <span v-for="skill in job.skills" :key="skill" class="chip bg-brand-50 text-brand-700">{{ skill }}</span>
-            </div>
-          </div>
-        </article>
-
-        <aside class="space-y-4">
-          <div class="card">
-            <h2 class="font-semibold text-slate-900">Apply for this job</h2>
+        <!-- Apply rail -->
+        <aside class="lg:sticky lg:top-20 lg:self-start">
+          <div class="rounded-2xl bg-slate-100 p-6">
+            <h2 class="text-[19px] font-semibold text-slate-900">Apply for this job</h2>
 
             <template v-if="!auth.isAuthenticated">
-              <p class="mt-2 text-sm text-slate-600">Create a worker account to apply.</p>
-              <div class="mt-3 flex gap-2">
-                <RouterLink class="btn-primary flex-1" :to="{ name: 'register', query: { redirect: route.fullPath } }">
-                  Sign up
+              <p class="muted mt-2 text-[15px]">Create a free worker account to apply.</p>
+              <div class="mt-4 flex flex-col gap-2">
+                <RouterLink class="btn-primary w-full" :to="{ name: 'register', query: { redirect: route.fullPath } }">
+                  Register &amp; apply
                 </RouterLink>
-                <RouterLink class="btn-secondary" :to="{ name: 'login', query: { redirect: route.fullPath } }">
-                  Log in
+                <RouterLink class="btn-secondary w-full" :to="{ name: 'login', query: { redirect: route.fullPath } }">
+                  I already have an account
                 </RouterLink>
               </div>
             </template>
 
             <template v-else-if="!auth.isWorker">
-              <p class="mt-2 text-sm text-slate-600">
+              <p class="muted mt-2 text-[15px]">
                 You are signed in as an {{ auth.roles[0] }}. Only worker accounts can apply to jobs.
               </p>
             </template>
 
             <template v-else>
-              <form class="mt-3 space-y-3" @submit.prevent="apply">
+              <form class="mt-4 space-y-3" @submit.prevent="apply">
                 <div>
                   <label class="label" for="cover">Cover letter</label>
                   <textarea
                     id="cover"
                     v-model="coverLetter"
-                    class="input min-h-32"
+                    class="input min-h-32 text-[15px]"
                     placeholder="Introduce yourself and why you are a great fit…"
                     :disabled="applying || !!applyMessage"
                   />
                 </div>
                 <button class="btn-primary w-full" type="submit" :disabled="applying || !!applyMessage">
-                  {{ applying ? 'Sending…' : applyMessage?.type === 'success' ? 'Applied ✓' : 'Apply now' }}
+                  {{ applying ? 'Sending…' : applyMessage?.type === 'success' ? 'Applied' : 'Apply now' }}
                 </button>
               </form>
 
@@ -206,25 +194,96 @@ function sourceLabel(source: string): string {
             </template>
           </div>
 
-          <div v-if="job.canEdit" class="card text-sm text-slate-600">
-            <p><strong>Views:</strong> {{ job.viewCount ?? 0 }}</p>
-            <p><strong>Applicants:</strong> {{ job.applicantCount ?? 0 }}</p>
-            <RouterLink class="mt-2 inline-block font-medium text-brand-600 hover:underline" :to="{ name: 'applicants', params: { jobId: job.id } }">
-              View applicants →
-            </RouterLink>
-          </div>
+          <!-- Job type and experience already appear as chips above. -->
+          <dl class="mt-8">
+            <div v-if="job.hoursPerWeek" class="meta-row">
+              <dt class="meta-key">Hours per week</dt>
+              <dd class="meta-value nums">{{ job.hoursPerWeek }} hrs</dd>
+            </div>
+            <div class="meta-row">
+              <dt class="meta-key">Pay basis</dt>
+              <dd class="meta-value">{{ humanize(job.payType) }}</dd>
+            </div>
+            <div v-if="job.closesAt" class="meta-row">
+              <dt class="meta-key">Closes</dt>
+              <dd class="meta-value">{{ formatDate(job.closesAt) }}</dd>
+            </div>
+            <div v-if="job.source" class="meta-row">
+              <dt class="meta-key">Source</dt>
+              <dd class="meta-value">{{ sourceLabel(job.source) }}</dd>
+            </div>
+          </dl>
 
-          <div class="card text-sm text-slate-600">
-            <h3 class="font-semibold text-slate-900">About {{ job.companyName }}</h3>
-            <p v-if="job.companyWebsite" class="mt-2 break-all">
-              <a :href="job.companyWebsite" target="_blank" rel="noopener nofollow" class="text-brand-600 hover:underline">
+          <div class="mt-8">
+            <h2 class="text-[15px] font-semibold text-slate-900">About {{ job.companyName }}</h2>
+            <p v-if="job.companyWebsite" class="mt-2 text-[15px]">
+              <a
+                :href="job.companyWebsite"
+                target="_blank"
+                rel="noopener nofollow"
+                class="link inline-flex items-center gap-1 break-all"
+              >
                 {{ job.companyWebsite }}
+                <Icon name="external-link" :size="13" />
               </a>
             </p>
-            <p class="mt-2 text-xs text-slate-400">{{ job.categoryName }} · {{ humanize(job.region) }}</p>
+            <p v-else class="muted mt-2 text-[15px]">No website provided.</p>
+          </div>
+
+          <div v-if="job.canEdit" class="mt-8 rounded-2xl bg-slate-100 p-5">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-[12px] text-slate-500">Views</p>
+                <p class="nums mt-0.5 text-[24px] font-semibold text-slate-900">{{ job.viewCount ?? 0 }}</p>
+              </div>
+              <div>
+                <p class="text-[12px] text-slate-500">Applicants</p>
+                <p class="nums mt-0.5 text-[24px] font-semibold text-slate-900">{{ job.applicantCount ?? 0 }}</p>
+              </div>
+            </div>
+            <RouterLink
+              class="arrow-link mt-3 text-[15px]"
+              :to="{ name: 'applicants', params: { jobId: job.id } }"
+            >
+              View applicants
+              <Icon name="arrow-right" :size="15" />
+            </RouterLink>
           </div>
         </aside>
       </div>
+
+      <div
+        v-if="job.status !== 'Published'"
+        class="mt-10 flex flex-wrap items-center gap-2 rounded-2xl bg-amber-50 px-5 py-4 text-[15px] text-amber-900"
+      >
+        <Icon name="shield" :size="17" class="text-amber-700" />
+        <span>
+          <strong>Preview.</strong> This job is {{ job.status.toLowerCase() }} and is not visible on the public board.
+          <span v-if="job.statusReason">Reason: {{ job.statusReason }}</span>
+        </span>
+        <RouterLink
+          v-if="job.canEdit"
+          :to="{ name: 'job-edit', params: { id: job.id } }"
+          class="link ml-auto"
+        >
+          Edit job
+        </RouterLink>
+      </div>
+
+      <!-- Description -->
+      <article class="mt-12 max-w-2xl border-t border-slate-200 pt-8">
+        <h2 class="section-title">About the role</h2>
+        <p class="mt-5 whitespace-pre-line text-pretty text-[19px] leading-[1.7] text-slate-700">
+          {{ job.description }}
+        </p>
+
+        <div v-if="job.skills?.length" class="mt-10">
+          <h2 class="text-[19px] font-semibold text-slate-900">Skills</h2>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <span v-for="skill in job.skills" :key="skill" class="chip">{{ skill }}</span>
+          </div>
+        </div>
+      </article>
     </template>
   </div>
 </template>
