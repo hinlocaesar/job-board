@@ -15,7 +15,7 @@ export interface SeoOptions {
   noindex?: boolean
 }
 
-const SITE_NAME = 'JobBoard'
+const SITE_NAME = 'Filipino VA'
 
 let current: SeoOptions = {}
 
@@ -35,7 +35,7 @@ function escapeHtml(value: string): string {
 
 function fullTitle(title?: string): string {
   if (!title) return `${SITE_NAME} — Remote jobs for Filipino talent`
-  // CMS authors often include the brand themselves ("… — JobBoard Blog").
+  // CMS authors often include the brand themselves ("… — Filipino VA Blog").
   if (title === SITE_NAME || title.toLowerCase().includes(SITE_NAME.toLowerCase())) return title
   return `${title} · ${SITE_NAME}`
 }

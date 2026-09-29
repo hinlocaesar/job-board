@@ -64,7 +64,7 @@ const columns = [
       </div>
 
       <div class="mt-10 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-6">
-        <p class="text-[12px] text-slate-500">Copyright &copy; {{ year }} JobBoard. All rights reserved.</p>
+        <p class="text-[12px] text-slate-500">Copyright &copy; {{ year }} Filipino VA. All rights reserved.</p>
         <p class="text-[12px] text-slate-500">Built with Umbraco &amp; Vue 3</p>
       </div>
     </div>

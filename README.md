@@ -1,4 +1,4 @@
-# JobBoard — remote-work job marketplace (Phase 1 MVP)
+# Filipino VA — remote-work job marketplace (Phase 1 MVP)
 
 Umbraco 17 (headless CMS) + ASP.NET Core Marketplace API + Vue 3 frontend, built
 from `Prompt.txt` and `AGENTS.md`. Phase 1 covers accounts, worker profiles, job

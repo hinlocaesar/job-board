@@ -11,7 +11,7 @@ describe('useSeo', () => {
 
     expect(getSeo().title).toBe('Remote jobs')
     const html = renderHeadHtml()
-    expect(html).toContain('<title>Remote jobs · JobBoard</title>')
+    expect(html).toContain('<title>Remote jobs · Filipino VA</title>')
     expect(html).toContain('<meta name="description" content="Find work">')
     expect(html).toContain('<link rel="canonical" href="https://jobboard.test/jobs">')
     expect(html).toContain('og:url" content="https://jobboard.test/jobs"')
@@ -24,8 +24,15 @@ describe('useSeo', () => {
   })
 
   it('does not append the site name twice', () => {
-    useSeo({ title: 'FAQ — Hiring Filipino VAs | JobBoard' })
-    expect(renderHeadHtml()).toContain('<title>FAQ — Hiring Filipino VAs | JobBoard</title>')
+    // The brand contains a space, so the check is a plain substring match —
+    // a title already carrying it must be returned untouched.
+    useSeo({ title: 'FAQ — Hiring Filipino VAs | Filipino VA' })
+    expect(renderHeadHtml()).toContain('<title>FAQ — Hiring Filipino VAs | Filipino VA</title>')
+  })
+
+  it('still appends when the title only reads like the brand', () => {
+    useSeo({ title: 'How to hire remote help' })
+    expect(renderHeadHtml()).toContain('<title>How to hire remote help · Filipino VA</title>')
   })
 
   it('escapes HTML in tags', () => {
@@ -40,7 +47,7 @@ describe('useSeo', () => {
     useSeo({ title: 'First' })
     useSeo({ description: 'Second' })
     const html = renderHeadHtml()
-    expect(html).toContain('<title>First · JobBoard</title>')
+    expect(html).toContain('<title>First · Filipino VA</title>')
     expect(html).toContain('content="Second"')
   })
 

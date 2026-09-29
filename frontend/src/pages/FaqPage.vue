@@ -13,7 +13,8 @@ import { siteOrigin, useSeo } from '../composables/useSeo'
 
 useSeo({
   title: 'Help & FAQ',
-  description: 'Answers about creating a profile, applying to jobs, posting roles and privacy on JobBoard.',
+  description:
+    'Answers about creating a profile, applying to jobs, posting roles and privacy on Filipino VA.',
 })
 
 interface FaqItem {
@@ -86,7 +87,7 @@ const faqs = computed<FaqItem[]>(() => {
       {{ propString(page, 'heading') || 'Help & FAQ' }}
     </h1>
     <p class="muted mt-5 text-[19px]">
-      {{ propString(page, 'intro') || 'Everything you need to know about using JobBoard.' }}
+      {{ propString(page, 'intro') || 'Everything you need to know about using Filipino VA.' }}
     </p>
 
     <div class="mt-12">

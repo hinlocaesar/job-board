@@ -9,8 +9,8 @@ defineProps<{ compact?: boolean }>()
   <RouterLink
     :to="{ name: 'home' }"
     class="text-[17px] font-semibold tracking-tight text-slate-900"
-    aria-label="JobBoard — home"
+    aria-label="Filipino VA — home"
   >
-    Job<span class="text-slate-500">Board</span>
+    Filipino <span class="text-slate-500">VA</span>
   </RouterLink>
 </template>

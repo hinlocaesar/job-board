@@ -87,7 +87,7 @@ describe.skipIf(!live)('pages rendered against the live API + CMS', () => {
     expect(text).toContain('About the role')
     expect(text).toContain('Apply for this job')
     // useSeo() writes the head tags on the client (the prerender covers SSR).
-    expect(document.title).toBe(`${job.title} · JobBoard`)
+    expect(document.title).toBe(`${job.title} · Filipino VA`)
     expect(document.head.querySelector('meta[name="description"]')?.getAttribute('content')).toBeTruthy()
     expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(
       `http://localhost:5173/jobs/${job.slug}`,
